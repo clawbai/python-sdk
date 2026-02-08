@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clawb-agent-sdk"
+version = "0.1.1"
+description = "Python SDK for Clawb agent registration/attestation and request signing"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Clawb"}]
+dependencies = [
+  "cryptography>=42.0.0",
+]
+
+[project.urls]
+Homepage = "https://clawb.ai"
+
+[project.scripts]
+clawb-agent = "clawb_agent_sdk.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["clawb_agent_sdk*"]
