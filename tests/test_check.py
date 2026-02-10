@@ -6,7 +6,7 @@ from clawb_agent_sdk.client import ClawbClient
 
 class TestCheck(unittest.TestCase):
     def test_check_calls_unsigned(self):
-        c = ClawbClient(base_url="https://clawb.ai/api")
+        c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"decision": "allow"}})
 
         out = c.check(agent_id="agt_123", policy_id="pol_default")
