@@ -34,7 +34,7 @@ class TestCliBootstrap(unittest.TestCase):
 
         # Act
         with redirect_stdout(buf):
-            rc = cmd_bootstrap(["--name", "my-agent", "--print-json", "--base-url", "https://clawb.ai/api"])
+            rc = cmd_bootstrap(["--name", "my-agent", "--print-json", "--base-url", "https://api.clawb.ai/api"])
 
         # Assert
         self.assertEqual(rc, 0)

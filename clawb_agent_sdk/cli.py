@@ -13,7 +13,7 @@ def _add_common(p: argparse.ArgumentParser) -> None:
     p.add_argument(
         "--base-url",
         default="https://api.clawb.ai/api",
-        help="Clawb API base URL (default: https://clawb.ai/api)",
+        help="Clawb API base URL (default: https://api.clawb.ai/api)",
     )
 
 

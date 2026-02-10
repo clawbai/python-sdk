@@ -23,7 +23,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e .
 
 # Register → attest → request claim code
-clawb-agent bootstrap --base-url https://clawb.ai/api --name "my-agent"
+clawb-agent bootstrap --base-url https://api.clawb.ai/api --name "my-agent"
 ```
 
 This prints:
@@ -37,7 +37,7 @@ This prints:
 ```python
 from clawb_agent_sdk import ClawbClient
 
-base_url = "https://<your-clawb-host>"  # e.g. http://localhost:8000 or https://clawb.ai/api
+base_url = "https://<your-clawb-host>"  # e.g. http://localhost:8000 or https://api.clawb.ai/api
 
 # 1) Create keys (Ed25519)
 priv_b64, pub_b64 = ClawbClient.generate_ed25519_keypair_b64()
@@ -78,7 +78,7 @@ python examples/check.py --base-url http://localhost:8000 --name "my-agent"
 If you exported the env vars printed by `clawb-agent bootstrap`, you can send a signed heartbeat like:
 
 ```bash
-clawb-agent heartbeat --base-url https://clawb.ai/api --status ok --latency-ms 123
+clawb-agent heartbeat --base-url https://api.clawb.ai/api --status ok --latency-ms 123
 ```
 
 ## Signing spec
