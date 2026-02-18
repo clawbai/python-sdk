@@ -34,6 +34,32 @@ This prints:
 
 ## Quickstart (Python)
 
+### Providers (Vault + API key)
+
+The SDK includes thin provider helpers:
+
+- `VaultProvider` for agent-signed Vault endpoints
+- `ApiProvider` for provider-key endpoints (ex: email send)
+
+```python
+from clawb_agent_sdk import ClawbClient, VaultProvider, ApiProvider
+
+base_url = "https://api.clawb.ai/api"
+
+# Vault (agent-signed)
+client = ClawbClient(base_url=base_url, agent_id="agt_...", private_key_b64="...")
+vault = VaultProvider(client=client)
+# vault.policy_eval(...)
+# vault.mint_request_lease(...)
+# vault.secrets_read(...)
+# vault.proxy_request(...)
+
+# Provider-key endpoints (unsigned, authenticated via X-CLAWB-API-KEY)
+provider_client = ClawbClient(base_url=base_url)
+api = ApiProvider(client=provider_client, api_key="ck_live_...")
+# api.email_send(...)
+```
+
 ```python
 from clawb_agent_sdk import ClawbClient
 
