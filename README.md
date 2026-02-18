@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/clawbai/clawb/main/site/public/logo.png" alt="Clawb" width="520" />
+  <img src="https://clawb.ai/logo.png" alt="Clawb" width="520" />
 </p>
 
 # Clawb Agent SDK (Python)
