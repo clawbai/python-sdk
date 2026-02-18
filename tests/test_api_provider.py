@@ -22,7 +22,7 @@ class TestApiProvider(unittest.TestCase):
         args, kwargs = c.post.call_args
         self.assertEqual(args[0], "/v1/email/send")
         self.assertEqual(kwargs.get("signed"), False)
-        self.assertEqual(kwargs.get("headers"), {"X-CLAWB-API-KEY": "ck_live_123"})
+        self.assertEqual(kwargs.get("headers"), {"X-Clawb-Api-Key": "ck_live_123"})
 
 
 if __name__ == "__main__":

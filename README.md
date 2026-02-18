@@ -34,7 +34,7 @@ This prints:
 
 ## Quickstart (Python)
 
-### Providers (Vault + API key)
+### Providers (Vault + provider API key)
 
 The SDK includes thin provider helpers:
 
@@ -54,9 +54,11 @@ vault = VaultProvider(client=client)
 # vault.secrets_read(...)
 # vault.proxy_request(...)
 
-# Provider-key endpoints (unsigned, authenticated via X-CLAWB-API-KEY)
+# Provider endpoints (server-to-server; authenticated via X-Clawb-Api-Key)
 provider_client = ClawbClient(base_url=base_url)
 api = ApiProvider(client=provider_client, api_key="ck_live_...")
+# api.verify(...)
+# api.check(...)
 # api.email_send(...)
 ```
 
