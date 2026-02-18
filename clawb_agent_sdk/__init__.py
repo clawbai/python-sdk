@@ -1,4 +1,5 @@
 from .client import ClawbClient
+from .providers import ApiProvider, VaultProvider
 from .signing import (
     canonical_bytes,
     sha256_hex,
@@ -9,6 +10,8 @@ from .signing import (
 
 __all__ = [
     "ClawbClient",
+    "ApiProvider",
+    "VaultProvider",
     "canonical_bytes",
     "sha256_hex",
     "sign_canonical_b64",
