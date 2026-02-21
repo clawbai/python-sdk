@@ -19,7 +19,11 @@ from clawb_agent_sdk import ApiProvider, ClawbClient
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Clawb SDK example: register/attest then call /v1/check")
-    ap.add_argument("--base-url", default="http://localhost:8000", help="Clawb API base url")
+    ap.add_argument(
+        "--base-url",
+        default="http://localhost:8000/api",
+        help="Clawb API root URL (includes /api)",
+    )
     ap.add_argument("--name", default="example-agent", help="Agent name")
     ap.add_argument("--policy-id", default="pol_default", help="Policy id")
     ap.add_argument("--api-key", required=True, help="Provider API key for /v1/check")
