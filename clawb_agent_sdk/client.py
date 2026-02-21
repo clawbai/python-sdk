@@ -11,6 +11,9 @@ from .signing import build_signed_headers, generate_ed25519_keypair_b64, sign_ca
 class ClawbClient:
     """Minimal Clawb API client.
 
+    ``base_url`` is expected to be the API root (for example,
+    ``https://api.clawb.ai/api``), and request helpers append ``/v1/...`` paths.
+
     Dependency-light: uses stdlib `urllib` (no `requests`).
     """
 

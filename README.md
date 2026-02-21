@@ -35,6 +35,8 @@ python -m unittest discover -s tests -p 'test_*.py'
 
 ## CLI
 
+`--base-url`/`base_url` should always be the Clawb API root (it already includes `/api`).
+
 ```bash
 # Register → attest → claim-code
 clawb-agent bootstrap --base-url https://api.clawb.ai/api --name "my-agent"

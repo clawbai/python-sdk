@@ -23,7 +23,7 @@ import os
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request
 
-CLAWB_BASE_URL = os.getenv("CLAWB_BASE_URL", "http://localhost:8000")
+CLAWB_BASE_URL = os.getenv("CLAWB_BASE_URL", "http://localhost:8000/api")
 CLAWB_POLICY_ID = os.getenv("CLAWB_POLICY_ID", "pol_default")
 
 app = FastAPI()
