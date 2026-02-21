@@ -48,14 +48,24 @@ clawb-agent heartbeat --base-url https://api.clawb.ai/api --status ok --latency-
 ## Provider check (canonical flow)
 
 `/v1/check` is a provider-authenticated server-to-server endpoint.
-Use `ApiProvider.check(...)` with your provider API key:
+Use `ApiProvider.check(...)` with either an API key header (default) or bearer token:
 
 ```python
 from clawb_agent_sdk import ApiProvider, ClawbClient
 
 client = ClawbClient(base_url="https://api.clawb.ai/api")
+
+# Default (backward-compatible): X-Clawb-Api-Key header
 provider = ApiProvider(client=client, api_key="ck_live_...")
 decision = provider.check(agent_id="agt_123", policy_id="pol_default")
+
+# Optional: Authorization: Bearer ... header
+provider_bearer = ApiProvider(
+    client=client,
+    bearer_token="provider_token_...",
+    auth_mode="bearer",
+)
+decision = provider_bearer.check(agent_id="agt_123", policy_id="pol_default")
 ```
 
 `ClawbClient.check(...)` is kept only as a deprecated compatibility shim and now

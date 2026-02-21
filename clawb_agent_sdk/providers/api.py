@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 import hashlib
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal, Optional
 
 from ..client import ClawbClient
 
@@ -24,13 +24,34 @@ class ApiProvider:
     """
 
     client: ClawbClient
-    api_key: str
+    api_key: Optional[str] = None
+    bearer_token: Optional[str] = None
+    auth_mode: Literal["api_key", "bearer"] = "api_key"
+
+    def __post_init__(self) -> None:
+        if self.auth_mode not in ("api_key", "bearer"):
+            raise ValueError("auth_mode must be either 'api_key' or 'bearer'")
+
+        has_api_key = bool((self.api_key or "").strip())
+        has_bearer = bool((self.bearer_token or "").strip())
+        if has_api_key and has_bearer:
+            raise ValueError("api_key and bearer_token are mutually exclusive")
+
+        if self.auth_mode == "api_key" and not has_api_key:
+            raise ValueError("api_key is required when auth_mode='api_key'")
+        if self.auth_mode == "bearer" and not has_bearer:
+            raise ValueError("bearer_token is required when auth_mode='bearer'")
 
     def _headers(self) -> Dict[str, str]:
+        if self.auth_mode == "bearer":
+            token = (self.bearer_token or "").strip()
+            if not token:
+                raise ValueError("bearer_token is required when auth_mode='bearer'")
+            return {"Authorization": f"Bearer {token}"}
+
         k = (self.api_key or "").strip()
         if not k:
-            raise ValueError("api_key is required")
-        # Backend accepts X-Clawb-Api-Key / Authorization as well, but we standardize on this.
+            raise ValueError("api_key is required when auth_mode='api_key'")
         return {"X-Clawb-Api-Key": k}
 
     @staticmethod
