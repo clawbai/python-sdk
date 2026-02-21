@@ -155,7 +155,8 @@ class ClawbClient:
         if not self.agent_id or not self.private_key_b64:
             raise ValueError("agent_id and private_key_b64 required")
 
-        r = self.post("/v1/agents/claim-code", signed=True, json={})
+        path = f"/v1/agents/{self.agent_id}/claim-code"
+        r = self.post(path, signed=True, json={})
         if r["status"] >= 400:
             raise RuntimeError(
                 f"claim-code failed: status={r['status']} body={r.get('json') or r.get('body')}"
@@ -184,3 +185,30 @@ class ClawbClient:
 
         provider = ApiProvider(client=self, api_key=k)
         return provider.check(agent_id=agent_id, policy_id=policy_id)
+
+    def identity_introspect(self, *, token: str, scope_hash: Optional[str] = None) -> Dict[str, Any]:
+        payload: Dict[str, Any] = {"token": token}
+        if scope_hash:
+            payload["scope_hash"] = scope_hash
+        r = self.post("/v1/identity/introspect", signed=False, json=payload)
+        if r["status"] >= 400:
+            raise RuntimeError(
+                f"identity_introspect failed: status={r['status']} body={r.get('json') or r.get('body')}"
+            )
+        return r["json"]
+
+    def well_known_openid_configuration(self) -> Dict[str, Any]:
+        r = self.get("/.well-known/openid-configuration", signed=False)
+        if r["status"] >= 400:
+            raise RuntimeError(
+                f"well_known_openid_configuration failed: status={r['status']} body={r.get('json') or r.get('body')}"
+            )
+        return r["json"]
+
+    def well_known_jwks(self) -> Dict[str, Any]:
+        r = self.get("/.well-known/clawb/jwks.json", signed=False)
+        if r["status"] >= 400:
+            raise RuntimeError(
+                f"well_known_jwks failed: status={r['status']} body={r.get('json') or r.get('body')}"
+            )
+        return r["json"]

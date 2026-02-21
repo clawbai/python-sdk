@@ -70,3 +70,42 @@ decision = provider_bearer.check(agent_id="agt_123", policy_id="pol_default")
 
 `ClawbClient.check(...)` is kept only as a deprecated compatibility shim and now
 requires an `api_key`; prefer `ApiProvider.check(...)` in new code.
+
+## Provider APIs (new)
+
+The SDK now wraps additional provider-key endpoints:
+
+- Agent identity mapping: `provider_agents_upsert(...)`, `provider_agents_list(...)`
+- Audit queries/exports: `provider_audit_events(...)`, `provider_audit_export(...)`
+- Minted credentials: `identity_credentials_mint(...)`, `identity_credentials_revoke(...)`,
+  `identity_credentials_revoke_by_agent(...)`
+- Kill switch controls: `identity_kill_switch_minting(...)`, `identity_kill_switch_revoke_all(...)`,
+  `identity_kill_switch_status(...)`
+- Reputation feedback (HMAC signed): `reputation_feedback(...)`
+
+Example (mint credentials):
+
+```python
+from clawb_agent_sdk import ApiProvider, ClawbClient
+
+client = ClawbClient(base_url="https://api.clawb.ai/api")
+provider = ApiProvider(client=client, api_key="ck_live_...")
+
+resp = provider.identity_credentials_mint(
+    agent_id="agt_123",
+    ttl_seconds=300,
+    one_time=True,
+    scopes=["vault:read"],
+    token_type="jwt",
+)
+```
+
+## Public metadata endpoints
+
+```python
+from clawb_agent_sdk import ClawbClient
+
+client = ClawbClient(base_url="https://api.clawb.ai/api")
+config = client.well_known_openid_configuration()
+jwks = client.well_known_jwks()
+```
