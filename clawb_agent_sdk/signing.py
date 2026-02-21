@@ -1,5 +1,6 @@
 import base64
 import hashlib
+import hmac
 import time
 import uuid
 from dataclasses import dataclass
@@ -92,3 +93,29 @@ def build_signed_headers(
     canonical = canonical_bytes(method=method, path=path, timestamp_ms=ts, nonce=n, body=body)
     sig_b64 = sign_canonical_b64(private_key_b64, canonical)
     return SignedHeaders(agent_id=agent_id, timestamp_ms=ts, nonce=n, signature_b64=sig_b64).as_dict()
+
+
+def build_feedback_headers(
+    *,
+    api_key: str,
+    body: bytes = b"",
+    timestamp_ms: Optional[int] = None,
+    nonce: Optional[str] = None,
+) -> Dict[str, str]:
+    """Build headers for provider reputation feedback HMAC auth.
+
+    Server uses HMAC-SHA256 with key=sha256(api_key) (hex -> bytes).
+    Message format: "{ts}\n{nonce}\n{sha256(body)}"
+    """
+    ts = int(timestamp_ms if timestamp_ms is not None else time.time() * 1000)
+    n = nonce or new_nonce()
+    body_hash = sha256_hex(body)
+    key_hex = hashlib.sha256((api_key or "").encode("utf-8")).hexdigest()
+    key_bytes = bytes.fromhex(key_hex)
+    msg = f"{ts}\n{n}\n{body_hash}".encode("utf-8")
+    sig_b64 = base64.b64encode(hmac.new(key_bytes, msg, hashlib.sha256).digest()).decode("utf-8")
+    return {
+        "X-Clawb-Feedback-Timestamp": str(ts),
+        "X-Clawb-Feedback-Nonce": n,
+        "X-Clawb-Feedback-Signature": sig_b64,
+    }

@@ -5,6 +5,7 @@ from .signing import (
     sha256_hex,
     sign_canonical_b64,
     build_signed_headers,
+    build_feedback_headers,
     generate_ed25519_keypair_b64,
 )
 
@@ -16,5 +17,6 @@ __all__ = [
     "sha256_hex",
     "sign_canonical_b64",
     "build_signed_headers",
+    "build_feedback_headers",
     "generate_ed25519_keypair_b64",
 ]
