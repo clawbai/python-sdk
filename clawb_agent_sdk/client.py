@@ -2,6 +2,7 @@ import base64
 import json as _json
 import urllib.error
 import urllib.request
+import warnings
 from typing import Any, Dict, Optional
 
 from .signing import build_signed_headers, generate_ed25519_keypair_b64, sign_canonical_b64
@@ -159,20 +160,24 @@ class ClawbClient:
         return r["json"]
 
     def check(self, *, agent_id: str, policy_id: str = "pol_default", api_key: Optional[str] = None):
-        """Ask Clawb for a policy decision for an agent (NOT signed).
+        """Deprecated shim for provider-authenticated ``/v1/check``.
 
-        This endpoint is intentionally unsigned so a relying service can call it server-to-server
-        while it verifies the agent signature on the *original inbound request*. Newer API
-        deployments require a provider API key via ``X-Clawb-Api-Key``.
-
-        Returns JSON: {decision: allow|challenge|deny, reasons: [...], ...}
+        Prefer ``ApiProvider(client=..., api_key=...).check(...)``.
         """
-        payload = {"agent_id": agent_id, "policy_id": policy_id}
-        headers = None
-        if api_key is not None:
-            headers = {"X-Clawb-Api-Key": api_key.strip()}
+        warnings.warn(
+            "ClawbClient.check() is deprecated; use ApiProvider.check() with a provider API key.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
-        r = self.post("/v1/check", signed=False, headers=headers, json=payload)
-        if r["status"] >= 400:
-            raise RuntimeError(f"check failed: status={r['status']} body={r.get('json') or r.get('body')}")
-        return r["json"]
+        k = (api_key or "").strip()
+        if not k:
+            raise ValueError(
+                "provider api_key is required for /v1/check. "
+                "Use ApiProvider(client=..., api_key=...).check(...)."
+            )
+
+        from .providers import ApiProvider
+
+        provider = ApiProvider(client=self, api_key=k)
+        return provider.check(agent_id=agent_id, policy_id=policy_id)

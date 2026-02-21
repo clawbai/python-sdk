@@ -42,3 +42,19 @@ clawb-agent bootstrap --base-url https://api.clawb.ai/api --name "my-agent"
 # Signed heartbeat
 clawb-agent heartbeat --base-url https://api.clawb.ai/api --status ok --latency-ms 123
 ```
+
+## Provider check (canonical flow)
+
+`/v1/check` is a provider-authenticated server-to-server endpoint.
+Use `ApiProvider.check(...)` with your provider API key:
+
+```python
+from clawb_agent_sdk import ApiProvider, ClawbClient
+
+client = ClawbClient(base_url="https://api.clawb.ai/api")
+provider = ApiProvider(client=client, api_key="ck_live_...")
+decision = provider.check(agent_id="agt_123", policy_id="pol_default")
+```
+
+`ClawbClient.check(...)` is kept only as a deprecated compatibility shim and now
+requires an `api_key`; prefer `ApiProvider.check(...)` in new code.
