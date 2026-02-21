@@ -158,16 +158,21 @@ class ClawbClient:
             )
         return r["json"]
 
-    def check(self, *, agent_id: str, policy_id: str = "pol_default"):
+    def check(self, *, agent_id: str, policy_id: str = "pol_default", api_key: Optional[str] = None):
         """Ask Clawb for a policy decision for an agent (NOT signed).
 
         This endpoint is intentionally unsigned so a relying service can call it server-to-server
-        while it verifies the agent signature on the *original inbound request*.
+        while it verifies the agent signature on the *original inbound request*. Newer API
+        deployments require a provider API key via ``X-Clawb-Api-Key``.
 
         Returns JSON: {decision: allow|challenge|deny, reasons: [...], ...}
         """
         payload = {"agent_id": agent_id, "policy_id": policy_id}
-        r = self.post("/v1/check", signed=False, json=payload)
+        headers = None
+        if api_key is not None:
+            headers = {"X-Clawb-Api-Key": api_key.strip()}
+
+        r = self.post("/v1/check", signed=False, headers=headers, json=payload)
         if r["status"] >= 400:
             raise RuntimeError(f"check failed: status={r['status']} body={r.get('json') or r.get('body')}")
         return r["json"]
