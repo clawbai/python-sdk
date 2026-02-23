@@ -1,11 +1,12 @@
 import base64
 import json as _json
+import time
 import urllib.error
 import urllib.request
 import warnings
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
-from .signing import build_signed_headers, generate_ed25519_keypair_b64, sign_canonical_b64
+from .signing import build_signed_headers, generate_ed25519_keypair_b64, sign_canonical_b64, sha256_hex
 
 
 class ClawbClient:
@@ -32,6 +33,7 @@ class ClawbClient:
         self.agent_id = agent_id
         self.private_key_b64 = private_key_b64
         self.timeout = timeout
+        self._token_cache: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
 
     # ---- key helpers
     @staticmethod
@@ -206,9 +208,82 @@ class ClawbClient:
         return r["json"]
 
     def well_known_jwks(self) -> Dict[str, Any]:
-        r = self.get("/.well-known/clawb/jwks.json", signed=False)
+        r = self.get("/.well-known/jwks.json", signed=False)
         if r["status"] >= 400:
             raise RuntimeError(
                 f"well_known_jwks failed: status={r['status']} body={r.get('json') or r.get('body')}"
             )
         return r["json"]
+
+    def _token_cache_key(self, *, audience: str, scopes: Optional[list], policy_id: str) -> Tuple[str, str, str]:
+        scope_key = ",".join(sorted([str(s).strip() for s in (scopes or []) if str(s).strip()]))
+        return (str(audience or "").strip(), scope_key, str(policy_id or "").strip())
+
+    def get_token(
+        self,
+        *,
+        audience: str,
+        scopes: Optional[list] = None,
+        policy_id: str = "pol_default",
+        ttl_seconds: int = 900,
+        context: Optional[dict] = None,
+        force_refresh: bool = False,
+        sign_method: str = "POST",
+        sign_path: str = "/v1/token/exchange",
+        sign_body_sha256: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Get a short-lived token from /v1/token/exchange with local cache."""
+        if not self.agent_id or not self.private_key_b64:
+            raise ValueError("agent_id and private_key_b64 are required")
+        aud = (audience or "").strip()
+        if not aud:
+            raise ValueError("audience is required")
+
+        cache_key = self._token_cache_key(audience=aud, scopes=scopes, policy_id=policy_id)
+        now = int(time.time())
+        if not force_refresh:
+            cached = self._token_cache.get(cache_key) or {}
+            # Refresh 30s early to avoid handing near-expiry tokens to callers.
+            if cached and int(cached.get("expires_at_s", 0)) > (now + 30):
+                return dict(cached.get("payload") or {})
+
+        req_scopes = [str(s).strip() for s in (scopes or []) if str(s).strip()]
+        req_payload = {
+            "agent_id": self.agent_id,
+            "audience": aud,
+            "scopes": req_scopes,
+            "policy_id": policy_id,
+            "ttl_seconds": int(ttl_seconds),
+        }
+        if context is not None:
+            req_payload["context"] = context
+
+        # Exchange signatures follow canonical request format to prove key possession.
+        ts_ms = int(time.time() * 1000)
+        nonce = f"n_{int(time.time() * 1000000)}"
+        body_sha = sign_body_sha256 or sha256_hex(
+            _json.dumps(req_payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        )
+        canonical = f"{(sign_method or 'POST').upper()}\n{(sign_path or '/v1/token/exchange')}\n{ts_ms}\n{nonce}\n{body_sha}".encode(
+            "utf-8"
+        )
+        sig_b64 = sign_canonical_b64(self.private_key_b64, canonical)
+        req_payload["agent_request"] = {
+            "method": (sign_method or "POST").upper(),
+            "path": sign_path or "/v1/token/exchange",
+            "timestamp_ms": ts_ms,
+            "nonce": nonce,
+            "body_sha256": body_sha,
+            "signature_b64": sig_b64,
+        }
+
+        r = self.post("/v1/token/exchange", signed=False, json=req_payload)
+        if r["status"] >= 400:
+            raise RuntimeError(f"get_token failed: status={r['status']} body={r.get('json') or r.get('body')}")
+        out = r["json"] or {}
+        expires_in = int(out.get("expires_in") or ttl_seconds)
+        self._token_cache[cache_key] = {
+            "expires_at_s": now + max(0, expires_in),
+            "payload": dict(out),
+        }
+        return out

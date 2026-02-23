@@ -100,6 +100,55 @@ resp = provider.identity_credentials_mint(
 )
 ```
 
+## Token exchange + identity helpers
+
+Use `get_token(...)` to exchange a signed assertion for a short-lived OIDC JWT.
+The SDK keeps a small local cache to avoid unnecessary exchange calls.
+
+```python
+from clawb_agent_sdk import ClawbClient
+
+client = ClawbClient(
+    base_url="https://api.clawb.ai/api",
+    agent_id="agt_123",
+    private_key_b64="<base64-ed25519-private-seed>",
+)
+
+token_resp = client.get_token(
+    audience="aws",
+    scopes=["s3:GetObject"],
+    policy_id="pol_default",
+)
+jwt = token_resp["token"]
+```
+
+`ClawbIdentity.sign_request(...)` provides low-level canonical signing for custom runtimes:
+
+```python
+from clawb_agent_sdk import ClawbIdentity
+
+identity = ClawbIdentity(agent_id="agt_123", private_key_b64="<base64-ed25519-private-seed>")
+signed = identity.sign_request(
+    method="POST",
+    path="/v1/token/exchange",
+    timestamp_ms=1740137855000,
+    nonce="n_123",
+    body=b'{"hello":"world"}',
+)
+```
+
+AWS helper:
+
+```python
+from clawb_agent_sdk import get_aws_credentials
+
+creds = get_aws_credentials(
+    clawb_jwt=jwt,
+    role_arn="arn:aws:iam::123456789012:role/demo",
+    role_session_name="agent-session",
+)
+```
+
 ## Public metadata endpoints
 
 ```python

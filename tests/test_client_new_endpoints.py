@@ -29,7 +29,7 @@ class TestClientNewEndpoints(unittest.TestCase):
         calls = c.get.call_args_list
         self.assertEqual(calls[0][0][0], "/.well-known/openid-configuration")
         self.assertEqual(calls[0][1].get("signed"), False)
-        self.assertEqual(calls[1][0][0], "/.well-known/clawb/jwks.json")
+        self.assertEqual(calls[1][0][0], "/.well-known/jwks.json")
         self.assertEqual(calls[1][1].get("signed"), False)
 
     def test_request_claim_code_uses_agent_path(self):
