@@ -2,15 +2,15 @@ import unittest
 from unittest.mock import MagicMock
 
 from clawb_agent_sdk.client import ClawbClient
-from clawb_agent_sdk.providers import ApiProvider
+from clawb_agent_sdk.providers import WorkspaceControlPlane
 
 
-class TestApiProvider(unittest.TestCase):
+class TestWorkspaceControlPlane(unittest.TestCase):
     def test_email_send_uses_api_key_header_unsigned(self):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"ok": True}})
 
-        p = ApiProvider(client=c, api_key="ck_live_123")
+        p = WorkspaceControlPlane(client=c, api_key="ck_live_123")
         out = p.email_send(
             agent_id="agt_123",
             policy_id="pol_default",
@@ -28,7 +28,7 @@ class TestApiProvider(unittest.TestCase):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"ok": True}})
 
-        p = ApiProvider(client=c, bearer_token="provider_token_123", auth_mode="bearer")
+        p = WorkspaceControlPlane(client=c, bearer_token="provider_token_123", auth_mode="bearer")
         out = p.email_send(
             agent_id="agt_123",
             policy_id="pol_default",
@@ -46,7 +46,7 @@ class TestApiProvider(unittest.TestCase):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
 
         with self.assertRaises(ValueError):
-            ApiProvider(
+            WorkspaceControlPlane(
                 client=c,
                 api_key="ck_live_123",
                 bearer_token="provider_token_123",

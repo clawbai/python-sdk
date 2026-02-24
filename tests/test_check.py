@@ -11,12 +11,12 @@ class TestCheck(unittest.TestCase):
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always", DeprecationWarning)
-            with self.assertRaisesRegex(ValueError, "provider api_key is required"):
+            with self.assertRaisesRegex(ValueError, "workspace api_key is required"):
                 c.check(agent_id="agt_123", policy_id="pol_default")
 
         self.assertTrue(any(isinstance(w.message, DeprecationWarning) for w in caught))
 
-    def test_check_delegates_to_provider_flow(self):
+    def test_check_delegates_to_workspace_flow(self):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"decision": "allow"}})
 

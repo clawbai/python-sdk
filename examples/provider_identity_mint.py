@@ -1,9 +1,9 @@
-from clawb_agent_sdk import ApiProvider, ClawbClient
+from clawb_agent_sdk import WorkspaceControlPlane, ClawbClient
 
 
 def main():
     client = ClawbClient(base_url="https://api.clawb.ai/api")
-    provider = ApiProvider(client=client, api_key="ck_live_...")
+    provider = WorkspaceControlPlane(client=client, api_key="ck_live_...")
 
     resp = provider.identity_credentials_mint(
         agent_id="agt_123",

@@ -168,10 +168,10 @@ class ClawbClient:
     def check(self, *, agent_id: str, policy_id: str = "pol_default", api_key: Optional[str] = None):
         """Deprecated shim for provider-authenticated ``/v1/check``.
 
-        Prefer ``ApiProvider(client=..., api_key=...).check(...)``.
+        Prefer ``WorkspaceControlPlane(client=..., api_key=...).check(...)``.
         """
         warnings.warn(
-            "ClawbClient.check() is deprecated; use ApiProvider.check() with a provider API key.",
+            "ClawbClient.check() is deprecated; use WorkspaceControlPlane.check() with a workspace API key.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -179,14 +179,14 @@ class ClawbClient:
         k = (api_key or "").strip()
         if not k:
             raise ValueError(
-                "provider api_key is required for /v1/check. "
-                "Use ApiProvider(client=..., api_key=...).check(...)."
+                "workspace api_key is required for /v1/check. "
+                "Use WorkspaceControlPlane(client=..., api_key=...).check(...)."
             )
 
-        from .providers import ApiProvider
+        from .providers import WorkspaceControlPlane
 
-        provider = ApiProvider(client=self, api_key=k)
-        return provider.check(agent_id=agent_id, policy_id=policy_id)
+        control_plane = WorkspaceControlPlane(client=self, api_key=k)
+        return control_plane.check(agent_id=agent_id, policy_id=policy_id)
 
     def identity_introspect(self, *, token: str, scope_hash: Optional[str] = None) -> Dict[str, Any]:
         payload: Dict[str, Any] = {"token": token}

@@ -6,10 +6,10 @@ Design goal: keep the core SDK dependency-light while providing ergonomic,
 endpoint-specific methods.
 """
 
-from .api import ApiProvider
+from .api import WorkspaceControlPlane
 from .vault import VaultProvider
 
 __all__ = [
-    "ApiProvider",
+    "WorkspaceControlPlane",
     "VaultProvider",
 ]

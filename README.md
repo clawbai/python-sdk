@@ -4,14 +4,14 @@
 
 # Clawb Agent SDK (Python)
 
-Python SDK for Clawb agent **registration**, **attestation**, **request signing**, and provider-side **verify/check** helpers.
+Python SDK for Clawb agent **registration**, **attestation**, **request signing**, and workspace-side **verify/check** helpers.
 
 ## Documentation (source of truth)
 
 All step-by-step guides live in the docs (so we only maintain them in one place):
 
 - Python SDK guide: https://docs.clawb.ai/sdk/python
-- Provider flow (Verify → Check): https://docs.clawb.ai/integration/provider-flow
+- Workspace flow (Verify → Check): https://docs.clawb.ai/integration/provider-flow
 
 ## Install
 
@@ -45,38 +45,38 @@ clawb-agent bootstrap --base-url https://api.clawb.ai/api --name "my-agent"
 clawb-agent heartbeat --base-url https://api.clawb.ai/api --status ok --latency-ms 123
 ```
 
-## Provider check (canonical flow)
+## Workspace check (canonical flow)
 
-`/v1/check` is a provider-authenticated server-to-server endpoint.
-Use `ApiProvider.check(...)` with either an API key header (default) or bearer token:
+`/v1/check` is a workspace-authenticated server-to-server endpoint.
+Use `WorkspaceControlPlane.check(...)` with either an API key header (default) or bearer token:
 
 ```python
-from clawb_agent_sdk import ApiProvider, ClawbClient
+from clawb_agent_sdk import WorkspaceControlPlane, ClawbClient
 
 client = ClawbClient(base_url="https://api.clawb.ai/api")
 
 # Default (backward-compatible): X-Clawb-Api-Key header
-provider = ApiProvider(client=client, api_key="ck_live_...")
-decision = provider.check(agent_id="agt_123", policy_id="pol_default")
+control_plane = WorkspaceControlPlane(client=client, api_key="ck_live_...")
+decision = control_plane.check(agent_id="agt_123", policy_id="pol_default")
 
 # Optional: Authorization: Bearer ... header
-provider_bearer = ApiProvider(
+control_plane_bearer = WorkspaceControlPlane(
     client=client,
     bearer_token="provider_token_...",
     auth_mode="bearer",
 )
-decision = provider_bearer.check(agent_id="agt_123", policy_id="pol_default")
+decision = control_plane_bearer.check(agent_id="agt_123", policy_id="pol_default")
 ```
 
 `ClawbClient.check(...)` is kept only as a deprecated compatibility shim and now
-requires an `api_key`; prefer `ApiProvider.check(...)` in new code.
+requires an `api_key`; prefer `WorkspaceControlPlane.check(...)` in new code.
 
-## Provider APIs (new)
+## Workspace APIs (new)
 
-The SDK now wraps additional provider-key endpoints:
+The SDK now wraps additional workspace-key endpoints:
 
-- Agent identity mapping: `provider_agents_upsert(...)`, `provider_agents_list(...)`
-- Audit queries/exports: `provider_audit_events(...)`, `provider_audit_export(...)`
+- Agent identity mapping: `workspace_agents_upsert(...)`, `workspace_agents_list(...)`
+- Audit queries/exports: `workspace_audit_events(...)`, `workspace_audit_export(...)`
 - Minted credentials: `identity_credentials_mint(...)`, `identity_credentials_revoke(...)`,
   `identity_credentials_revoke_by_agent(...)`
 - Kill switch controls: `identity_kill_switch_minting(...)`, `identity_kill_switch_revoke_all(...)`,
@@ -86,12 +86,12 @@ The SDK now wraps additional provider-key endpoints:
 Example (mint credentials):
 
 ```python
-from clawb_agent_sdk import ApiProvider, ClawbClient
+from clawb_agent_sdk import WorkspaceControlPlane, ClawbClient
 
 client = ClawbClient(base_url="https://api.clawb.ai/api")
-provider = ApiProvider(client=client, api_key="ck_live_...")
+control_plane = WorkspaceControlPlane(client=client, api_key="ck_live_...")
 
-resp = provider.identity_credentials_mint(
+resp = control_plane.identity_credentials_mint(
     agent_id="agt_123",
     ttl_seconds=300,
     one_time=True,

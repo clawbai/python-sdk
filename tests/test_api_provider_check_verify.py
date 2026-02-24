@@ -2,15 +2,15 @@ import unittest
 from unittest.mock import MagicMock
 
 from clawb_agent_sdk.client import ClawbClient
-from clawb_agent_sdk.providers import ApiProvider
+from clawb_agent_sdk.providers import WorkspaceControlPlane
 
 
-class TestApiProviderCheckVerify(unittest.TestCase):
+class TestWorkspaceControlPlaneCheckVerify(unittest.TestCase):
     def test_check_uses_api_key_header(self):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"decision": "allow"}})
 
-        p = ApiProvider(client=c, api_key="ck_live_123")
+        p = WorkspaceControlPlane(client=c, api_key="ck_live_123")
         out = p.check(agent_id="agt_123", policy_id="pol_default", action="refund")
 
         self.assertEqual(out["decision"], "allow")
@@ -24,7 +24,7 @@ class TestApiProviderCheckVerify(unittest.TestCase):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"valid": True}})
 
-        p = ApiProvider(client=c, api_key="ck_live_123")
+        p = WorkspaceControlPlane(client=c, api_key="ck_live_123")
         out = p.verify(
             agent_id="agt_123",
             method="POST",
@@ -45,7 +45,7 @@ class TestApiProviderCheckVerify(unittest.TestCase):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"decision": "allow"}})
 
-        p = ApiProvider(client=c, bearer_token="provider_token_123", auth_mode="bearer")
+        p = WorkspaceControlPlane(client=c, bearer_token="provider_token_123", auth_mode="bearer")
         out = p.check(agent_id="agt_123", policy_id="pol_default", action="refund")
 
         self.assertEqual(out["decision"], "allow")
@@ -58,7 +58,7 @@ class TestApiProviderCheckVerify(unittest.TestCase):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"valid": True}})
 
-        p = ApiProvider(client=c, bearer_token="provider_token_123", auth_mode="bearer")
+        p = WorkspaceControlPlane(client=c, bearer_token="provider_token_123", auth_mode="bearer")
         out = p.verify(
             agent_id="agt_123",
             method="POST",
