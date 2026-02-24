@@ -12,18 +12,18 @@ from ..signing import build_feedback_headers
 
 
 @dataclass
-class ApiProvider:
-    """Provider-key authenticated endpoints (for relying services).
+class WorkspaceControlPlane:
+    """Workspace-key authenticated endpoints (for relying services).
 
-    This helper is for API providers calling Clawb from server-to-server code.
+    This helper is for enterprise backend teams calling Clawb from server-to-server code.
 
     Endpoints:
-      - POST /v1/check  (policy decision)  -> requires provider API key
-      - POST /v1/verify (online signature verification) -> requires provider API key
-      - POST /v1/email/send (provider-key authenticated send)
+      - POST /v1/check  (policy decision)  -> requires workspace API key
+      - POST /v1/verify (online signature verification) -> requires workspace API key
+      - POST /v1/email/send (workspace-key authenticated send)
 
     This helper does not manage dashboard-session endpoints such as
-    /v1/provider/api-keys.
+    /v1/workspace/api-keys.
     """
 
     client: ClawbClient
@@ -94,9 +94,9 @@ class ApiProvider:
         email: Optional[dict] = None,
         extra: Optional[dict] = None,
     ) -> Dict[str, Any]:
-        """POST /v1/check (provider-key required).
+        """POST /v1/check (workspace-key required).
 
-        This is a server-to-server call made by a relying service/provider.
+        This is a server-to-server call made by a relying service.
         """
 
         payload: Dict[str, Any] = {
@@ -166,7 +166,7 @@ class ApiProvider:
         email: Dict[str, Any],
         policy_id: str = "pol_default",
     ) -> Dict[str, Any]:
-        """POST /v1/email/send (provider-key authenticated)."""
+        """POST /v1/email/send (workspace-key authenticated)."""
 
         payload = {
             "agent_id": agent_id,
@@ -183,17 +183,17 @@ class ApiProvider:
             raise RuntimeError(f"email_send failed: status={r['status']} body={r.get('json') or r.get('body')}")
         return r["json"]
 
-    def provider_api_keys_list(self) -> Dict[str, Any]:
+    def workspace_api_keys_list(self) -> Dict[str, Any]:
         raise NotImplementedError(
-            "Listing/creating provider API keys requires dashboard session auth; not supported by ApiProvider."
+            "Listing/creating workspace API keys requires dashboard session auth; not supported by WorkspaceControlPlane."
         )
 
-    def provider_api_keys_create(self, **_: Any) -> Dict[str, Any]:
+    def workspace_api_keys_create(self, **_: Any) -> Dict[str, Any]:
         raise NotImplementedError(
-            "Listing/creating provider API keys requires dashboard session auth; not supported by ApiProvider."
+            "Listing/creating workspace API keys requires dashboard session auth; not supported by WorkspaceControlPlane."
         )
 
-    def provider_agents_upsert(
+    def workspace_agents_upsert(
         self,
         *,
         external_agent_key: str,
@@ -220,18 +220,18 @@ class ApiProvider:
             payload["status"] = status
 
         r = self.client.post(
-            "/v1/provider/agents/upsert",
+            "/v1/workspace/agents/upsert",
             signed=False,
             headers=self._headers(),
             json=payload,
         )
         if r["status"] >= 400:
             raise RuntimeError(
-                f"provider_agents_upsert failed: status={r['status']} body={r.get('json') or r.get('body')}"
+                f"workspace_agents_upsert failed: status={r['status']} body={r.get('json') or r.get('body')}"
             )
         return r["json"]
 
-    def provider_agents_list(
+    def workspace_agents_list(
         self,
         *,
         environment: Optional[str] = None,
@@ -246,17 +246,17 @@ class ApiProvider:
             }
         )
         r = self.client.get(
-            f"/v1/provider/agents{query}",
+            f"/v1/workspace/agents{query}",
             signed=False,
             headers=self._headers(),
         )
         if r["status"] >= 400:
             raise RuntimeError(
-                f"provider_agents_list failed: status={r['status']} body={r.get('json') or r.get('body')}"
+                f"workspace_agents_list failed: status={r['status']} body={r.get('json') or r.get('body')}"
             )
         return r["json"]
 
-    def provider_audit_events(
+    def workspace_audit_events(
         self,
         *,
         start_ms: Optional[int] = None,
@@ -281,17 +281,17 @@ class ApiProvider:
             }
         )
         r = self.client.get(
-            f"/v1/provider/audit/events{query}",
+            f"/v1/workspace/audit/events{query}",
             signed=False,
             headers=self._headers(),
         )
         if r["status"] >= 400:
             raise RuntimeError(
-                f"provider_audit_events failed: status={r['status']} body={r.get('json') or r.get('body')}"
+                f"workspace_audit_events failed: status={r['status']} body={r.get('json') or r.get('body')}"
             )
         return r["json"]
 
-    def provider_audit_export(
+    def workspace_audit_export(
         self,
         *,
         format: str = "json",
@@ -305,14 +305,14 @@ class ApiProvider:
             payload["limit"] = limit
 
         r = self.client.post(
-            "/v1/provider/audit/export",
+            "/v1/workspace/audit/export",
             signed=False,
             headers=self._headers(),
             json=payload,
         )
         if r["status"] >= 400:
             raise RuntimeError(
-                f"provider_audit_export failed: status={r['status']} body={r.get('json') or r.get('body')}"
+                f"workspace_audit_export failed: status={r['status']} body={r.get('json') or r.get('body')}"
             )
         return r["json"]
 

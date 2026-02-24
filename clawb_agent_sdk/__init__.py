@@ -1,7 +1,7 @@
 from .client import ClawbClient
 from .cloud import get_aws_credentials
 from .identity import ClawbIdentity
-from .providers import ApiProvider, VaultProvider
+from .providers import WorkspaceControlPlane, VaultProvider
 from .enforcement import (
     BlockedActionError,
     ChallengedActionError,
@@ -26,7 +26,7 @@ from .signing import (
 __all__ = [
     "ClawbClient",
     "ClawbIdentity",
-    "ApiProvider",
+    "WorkspaceControlPlane",
     "VaultProvider",
     "get_aws_credentials",
     "canonical_bytes",

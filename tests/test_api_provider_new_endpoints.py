@@ -6,16 +6,16 @@ import unittest
 from unittest.mock import MagicMock
 
 from clawb_agent_sdk.client import ClawbClient
-from clawb_agent_sdk.providers import ApiProvider
+from clawb_agent_sdk.providers import WorkspaceControlPlane
 
 
-class TestApiProviderNewEndpoints(unittest.TestCase):
-    def test_provider_agents_upsert(self):
+class TestWorkspaceControlPlaneNewEndpoints(unittest.TestCase):
+    def test_workspace_agents_upsert(self):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"ok": True}})
 
-        p = ApiProvider(client=c, api_key="ck_live_123")
-        out = p.provider_agents_upsert(
+        p = WorkspaceControlPlane(client=c, api_key="ck_live_123")
+        out = p.workspace_agents_upsert(
             external_agent_key="ext_1",
             agent_id="agt_1",
             display_name="Demo",
@@ -27,49 +27,49 @@ class TestApiProviderNewEndpoints(unittest.TestCase):
 
         self.assertTrue(out["ok"])
         args, kwargs = c.post.call_args
-        self.assertEqual(args[0], "/v1/provider/agents/upsert")
+        self.assertEqual(args[0], "/v1/workspace/agents/upsert")
         self.assertEqual(kwargs.get("signed"), False)
         self.assertEqual(kwargs.get("headers"), {"X-Clawb-Api-Key": "ck_live_123"})
 
-    def test_provider_agents_list_query(self):
+    def test_workspace_agents_list_query(self):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.get = MagicMock(return_value={"status": 200, "json": {"ok": True}})
 
-        p = ApiProvider(client=c, api_key="ck_live_123")
-        out = p.provider_agents_list(environment="prod", status="active", label="team1")
+        p = WorkspaceControlPlane(client=c, api_key="ck_live_123")
+        out = p.workspace_agents_list(environment="prod", status="active", label="team1")
 
         self.assertTrue(out["ok"])
         args, kwargs = c.get.call_args
-        self.assertEqual(args[0], "/v1/provider/agents?environment=prod&status=active&label=team1")
+        self.assertEqual(args[0], "/v1/workspace/agents?environment=prod&status=active&label=team1")
         self.assertEqual(kwargs.get("signed"), False)
         self.assertEqual(kwargs.get("headers"), {"X-Clawb-Api-Key": "ck_live_123"})
 
-    def test_provider_audit_events_query(self):
+    def test_workspace_audit_events_query(self):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.get = MagicMock(return_value={"status": 200, "json": {"items": []}})
 
-        p = ApiProvider(client=c, api_key="ck_live_123")
-        out = p.provider_audit_events(start_ms=10, end_ms=20, agent_id="agt_1", action="read", limit=5)
+        p = WorkspaceControlPlane(client=c, api_key="ck_live_123")
+        out = p.workspace_audit_events(start_ms=10, end_ms=20, agent_id="agt_1", action="read", limit=5)
 
         self.assertIn("items", out)
         args, kwargs = c.get.call_args
         self.assertEqual(
             args[0],
-            "/v1/provider/audit/events?start_ms=10&end_ms=20&agent_id=agt_1&action=read&limit=5",
+            "/v1/workspace/audit/events?start_ms=10&end_ms=20&agent_id=agt_1&action=read&limit=5",
         )
         self.assertEqual(kwargs.get("signed"), False)
         self.assertEqual(kwargs.get("headers"), {"X-Clawb-Api-Key": "ck_live_123"})
 
-    def test_provider_audit_export(self):
+    def test_workspace_audit_export(self):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"items": []}})
 
-        p = ApiProvider(client=c, api_key="ck_live_123")
-        out = p.provider_audit_export(format="json", filters={"agent_id": "agt_1"}, limit=100)
+        p = WorkspaceControlPlane(client=c, api_key="ck_live_123")
+        out = p.workspace_audit_export(format="json", filters={"agent_id": "agt_1"}, limit=100)
 
         self.assertIn("items", out)
         args, kwargs = c.post.call_args
-        self.assertEqual(args[0], "/v1/provider/audit/export")
+        self.assertEqual(args[0], "/v1/workspace/audit/export")
         self.assertEqual(kwargs.get("signed"), False)
         self.assertEqual(kwargs.get("headers"), {"X-Clawb-Api-Key": "ck_live_123"})
 
@@ -77,7 +77,7 @@ class TestApiProviderNewEndpoints(unittest.TestCase):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"ok": True}})
 
-        p = ApiProvider(client=c, api_key="ck_live_123")
+        p = WorkspaceControlPlane(client=c, api_key="ck_live_123")
         out = p.identity_credentials_mint(
             agent_id="agt_1",
             ttl_seconds=120,
@@ -96,7 +96,7 @@ class TestApiProviderNewEndpoints(unittest.TestCase):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.get = MagicMock(return_value={"status": 200, "json": {"ok": True}})
 
-        p = ApiProvider(client=c, api_key="ck_live_123")
+        p = WorkspaceControlPlane(client=c, api_key="ck_live_123")
         out = p.identity_kill_switch_status()
 
         self.assertTrue(out["ok"])
@@ -109,7 +109,7 @@ class TestApiProviderNewEndpoints(unittest.TestCase):
         c = ClawbClient(base_url="https://api.clawb.ai/api")
         c.post = MagicMock(return_value={"status": 200, "json": {"ok": True}})
 
-        p = ApiProvider(client=c, api_key="ck_live_123")
+        p = WorkspaceControlPlane(client=c, api_key="ck_live_123")
         out = p.reputation_feedback(
             agent_id="agt_1",
             verdict="ok",
