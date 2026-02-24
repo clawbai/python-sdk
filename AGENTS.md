@@ -1,3 +1,12 @@
+# Session bootstrap
+
+- At the start of every new session, read:
+  - `/Users/saeed/Projects/8-clawb/.codex/memory/initialize.md`
+  - `/Users/saeed/Projects/8-clawb/.codex/memory.md`
+- Use it as persistent project context before making changes.
+- If the memory file is missing, continue and report it once.
+- Never write secrets into git-tracked files.
+
 # Default workflow
 
 - After completing any code change, automatically:
